@@ -838,3 +838,296 @@ PR説明文の作成
 - DeepSeek product site: <https://www.deepseek.com/en/>
 - DeepSeek API pricing: <https://api-docs.deepseek.com/quick_start/pricing>
 - Meilisearch official site: <https://www.meilisearch.com/>
+
+---
+
+## 21. Claude Code 設定要素と他AI開発支援ツールの対応表
+
+作成日: `2026-05-03`
+
+対象概念:
+
+- `CLAUDE.md`
+- `Rules`
+- `Agents / Subagents`
+- `Skills`
+- 補助概念として `Commands / Hooks / MCP / Review rules`
+
+### 21.1 結論
+
+このリポジトリでは、次のように整理するのが最も安全で運用しやすい。
+
+| 用途 | 推奨する主ファイル / 機能 | 理由 |
+| --- | --- | --- |
+| プロジェクト全体の常時ルール | `AGENTS.md` + `CLAUDE.md` | Codex / Devin / GitHub Copilot が `AGENTS.md` を扱いやすく、Claude Code は `CLAUDE.md` が標準。GitHub Copilot cloud agent は `/CLAUDE.md` も読める。 |
+| Claude Code 用の常時ルール | `CLAUDE.md` | Claude Code の中心。ビルド、テスト、禁止事項、アーキテクチャ概要を書く。 |
+| Cursor 用の常時・条件付きルール | `.cursor/rules/*.mdc` | Cursor では Rules が主力。`Next.js禁止`、React + pico.css、Python/Rust などを明示する。 |
+| GitHub Copilot 用のリポジトリ指示 | `.github/copilot-instructions.md` | Copilot Chat、Copilot code review、Copilot cloud agent に効かせやすい。 |
+| GitHub Copilot 用のパス別指示 | `.github/instructions/*.instructions.md` | Python、Rust、Terraform、React、SQL などファイル種別ごとの指示に向く。 |
+| Devin 用のリポジトリ指示 | `AGENTS.md` | Devin は `AGENTS.md` を coding 前に読む。セットアップ、テスト、PR運用を書く。 |
+| Devin 用の組織・横断知識 | `Knowledge` | 組織共通のコーディング規約、デプロイ手順、PR命名規則などに向く。 |
+| 繰り返しワークフロー | `.agents/skills/<skill-name>/SKILL.md` | Codex / Devin で明示的に使いやすい。テスト、デプロイ、Terraform plan review、Vertex AI review などに向く。 |
+| PRレビュー規約 | `.github/copilot-instructions.md` + `REVIEW.md` | Copilot は custom instructions、Devin Review は `AGENTS.md` と `REVIEW.md` を読む。 |
+
+---
+
+### 21.2 Claude Code 概念別の対応表
+
+| Claude Code の概念 | 役割 | Codex 相当 | Cursor 相当 | GitHub Copilot 相当 | Devin 相当 | 運用コメント |
+| --- | --- | --- | --- | --- | --- | --- |
+| `CLAUDE.md` | 常時読み込ませるプロジェクト規約、build/test、禁止事項、設計方針 | `AGENTS.md` / `AGENTS.override.md` | `AGENTS.md` または `.cursor/rules/*.mdc` | `.github/copilot-instructions.md`、`AGENTS.md`、`/CLAUDE.md` | `AGENTS.md`、Knowledge | 共通ソースは `AGENTS.md`、Claude Code 専用は `CLAUDE.md` にする。内容を二重管理しないよう、どちらかを生成元にする。 |
+| `.claude/rules/` | 常時またはファイルパス別の細かいルール | ディレクトリ別 `AGENTS.md`、linters / hooks | `.cursor/rules/*.mdc` | `.github/instructions/*.instructions.md` | `AGENTS.md`、Knowledge、`REVIEW.md` | 言語別・ディレクトリ別ルールは各ツールの path-specific 機能に分ける。 |
+| Subagents / custom agents | 専門役割を持つ分離コンテキストのエージェント | Subagents / custom agents | Subagents | Copilot custom agents、Copilot cloud agent、Copilot CLI custom agents | Agent Mode、Agent selector、Managed Devins | 並列調査やレビューは agents。日常ルールは agents ではなく rules / instructions に置く。 |
+| Skills | 必要時に読み込む再利用可能な手順・知識・ワークフロー | `.agents/skills/<name>/SKILL.md` | Agent Skills | Copilot agent skills | `.agents/skills/<name>/SKILL.md` | テスト前確認、Terraform plan review、BigQuery SQL review、Vertex AI review などを skill 化する。 |
+| Slash commands / commands | 手動で起動する定型プロンプト | Slash commands / skills | Commands | Copilot CLI slash commands / prompt files | Custom slash commands / Playbooks | 「毎回人間が起動するもの」は command。AIが必要時に選ぶものは skill。 |
+| Hooks | 編集後・停止時などに決定的なスクリプトを実行 | Hooks | Hooks | Copilot CLI / cloud agent hooks | 明示的な hook 機能より Skills / Commands / CI で代替 | destructive な処理を直接 hook 化しない。lint/test/secret scan など安全な検証に使う。 |
+| MCP | 外部ツール・DB・GitHub・Linear・Docs への接続 | MCP | MCP | MCP servers | Devin MCP / DeepWiki MCP | Cloud / DB / 本番系は権限を最小化する。 |
+| Review rules | レビュー方針、検出したいバグパターン | Skill または AGENTS.md | Rules / Bugbot 対応ルール | `.github/copilot-instructions.md`、code review custom instructions | `REVIEW.md`、Devin Review | PRレビュー方針は通常の実装ルールと分けると運用しやすい。 |
+
+---
+
+### 21.3 ツール別の対応表
+
+| ツール | `CLAUDE.md` 相当 | `Rules` 相当 | `Agents` 相当 | `Skills` 相当 | Commands 相当 | 備考 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Claude Code | `CLAUDE.md` | `.claude/rules/` | Subagents | `.claude/skills/<name>/SKILL.md` | Slash commands / skills | 主力。CLI、Python/Rust、Terraform、DB、ML/MLOps に向く。 |
+| Codex | `AGENTS.md`、`AGENTS.override.md` | ディレクトリ別 `AGENTS.md`、hooks / linters | Subagents / custom agents | `.agents/skills/<name>/SKILL.md` | Slash commands。旧 custom prompts は skills に寄せる | 設計整理、実装委譲、レビュー、ドキュメント化に向く。 |
+| Cursor | `AGENTS.md`、`.cursor/rules` | `.cursor/rules/*.mdc` | Subagents / Cloud Agent | Agent Skills | `.cursor/commands` | IDE内実装速度、React + pico.css、局所修正に向く。 |
+| GitHub Copilot | `.github/copilot-instructions.md`、`AGENTS.md`、`/CLAUDE.md` | `.github/instructions/*.instructions.md` | Copilot cloud agent、custom agents、CLI custom agents | Copilot agent skills | Copilot CLI commands / prompt files | GitHub PR、レビュー、組織運用に向く。 |
+| Devin | `AGENTS.md`、Knowledge | Knowledge、`AGENTS.md`、`REVIEW.md` | Agent Mode、Agent selector、Managed Devins | `.agents/skills/<name>/SKILL.md` | Custom slash commands、Playbooks | チケット委譲、ブラウザ検証、PR作成、バックログ処理に向く。 |
+
+---
+
+### 21.4 この技術スタック向けの推奨配置
+
+```text
+repo-root/
+  AGENTS.md
+  CLAUDE.md
+  REVIEW.md
+
+  .github/
+    copilot-instructions.md
+    instructions/
+      python.instructions.md
+      rust.instructions.md
+      react-pico.instructions.md
+      terraform.instructions.md
+      sql.instructions.md
+      mlops-vertex-ai.instructions.md
+
+  .cursor/
+    rules/
+      project.mdc
+      python.mdc
+      rust.mdc
+      react-pico-no-nextjs.mdc
+      terraform.mdc
+      sql-bigquery-duckdb.mdc
+      mlops-vertex-ai.mdc
+    commands/
+      code-review.md
+      implementation-report.md
+
+  .agents/
+    skills/
+      test-before-pr/
+        SKILL.md
+      terraform-plan-review/
+        SKILL.md
+      bigquery-cost-review/
+        SKILL.md
+      rust-cargo-check/
+        SKILL.md
+      python-pytest-review/
+        SKILL.md
+      vertex-ai-pipeline-review/
+        SKILL.md
+      meilisearch-sync-review/
+        SKILL.md
+```
+
+#### 配置方針
+
+| ファイル / ディレクトリ | 目的 | 主な対象ツール |
+| --- | --- | --- |
+| `AGENTS.md` | 全AIエージェント向けの共通ルール | Codex / Devin / GitHub Copilot / Cursor |
+| `CLAUDE.md` | Claude Code 向けの最重要ルール | Claude Code / GitHub Copilot cloud agent |
+| `REVIEW.md` | PRレビュー方針、検出したいバグパターン | Devin Review、レビュー運用全般 |
+| `.github/copilot-instructions.md` | GitHub Copilot 全体向け指示 | GitHub Copilot |
+| `.github/instructions/*.instructions.md` | 言語別・パス別 Copilot 指示 | GitHub Copilot |
+| `.cursor/rules/*.mdc` | Cursor の常時・条件付きルール | Cursor |
+| `.cursor/commands/*.md` | Cursor の手動起動ワークフロー | Cursor |
+| `.agents/skills/*/SKILL.md` | 再利用可能な手順・知識・検証フロー | Codex / Devin / 一部Agent Skills対応ツール |
+
+---
+
+### 21.5 何を書くべきか
+
+#### `AGENTS.md` に書く内容
+
+```md
+# AGENTS.md
+
+## Project constraints
+
+- Backend and batch code must be Python or Rust.
+- PostgreSQL is the primary OLTP database.
+- BigQuery and DuckDB are used for analytics.
+- Meilisearch is search/indexing, not DWH.
+- Frontend must use React + pico.css.
+- Do not use Next.js.
+- Cloud/IaC is AWS, GCP, and Terraform.
+- ML is scikit-learn and LightGBM.
+- MLOps is Vertex AI.
+
+## Safety
+
+- Do not run destructive Terraform, cloud, DB, or production commands without explicit approval.
+- Prefer `terraform plan` review before any apply-like operation.
+- Do not change IAM, service accounts, buckets, datasets, or production resources without approval.
+
+## Testing
+
+- For Rust, run `cargo check` and relevant `cargo test`.
+- For Python, run the project pytest command.
+- Add or update tests when changing backend, batch, SQL, or ML pipeline code.
+```
+
+#### `CLAUDE.md` に書く内容
+
+```md
+# CLAUDE.md
+
+Follow `AGENTS.md` as the source of truth.
+
+## Claude Code workflow
+
+- First inspect existing code and tests.
+- Prefer small diffs.
+- Before editing Terraform, SQL, or MLOps files, explain the risk.
+- Never run destructive production commands without explicit approval.
+- Use CLI validation when possible.
+
+## Priority
+
+1. Preserve existing architecture.
+2. Avoid introducing unnecessary frameworks.
+3. Do not propose Next.js.
+4. Prefer Python/Rust, PostgreSQL, BigQuery, DuckDB, React + pico.css, Terraform, Vertex AI.
+```
+
+#### `.cursor/rules/react-pico-no-nextjs.mdc` に書く内容
+
+```md
+---
+description: React + pico.css frontend rule. Never use Next.js.
+---
+
+- Use React and pico.css.
+- Do not introduce Next.js.
+- Do not propose SSR, App Router, or Next-specific routing.
+- Prefer plain React components and minimal dependencies.
+- Keep components small and readable.
+```
+
+#### `.github/copilot-instructions.md` に書く内容
+
+```md
+# GitHub Copilot instructions
+
+This repository uses Python/Rust for backend and batch processing.
+Frontend is React + pico.css. Next.js is prohibited.
+
+Before suggesting code changes:
+
+- Check existing patterns.
+- Preserve current architecture.
+- Add or update tests for backend, batch, SQL, and ML pipeline changes.
+- For Terraform, prefer plan review and never assume apply is allowed.
+- For PR review, flag risky changes to IAM, production DB, GCP/AWS resources, and Vertex AI jobs.
+```
+
+#### `REVIEW.md` に書く内容
+
+```md
+# REVIEW.md
+
+## Review guidelines
+
+- Flag untested backend or batch changes.
+- Flag SQL changes without migration or rollback consideration.
+- Flag BigQuery queries that may scan excessive data.
+- Flag Terraform changes touching IAM, service accounts, datasets, buckets, or production resources.
+- Flag frontend changes that introduce Next.js.
+- Flag ML/MLOps changes without evaluation or reproducibility notes.
+- Confirm new code follows Python/Rust conventions used in this repo.
+```
+
+#### `.agents/skills/terraform-plan-review/SKILL.md` の例
+
+```md
+---
+name: terraform-plan-review
+description: Review Terraform changes and terraform plan output for AWS/GCP safety risks before apply.
+---
+
+Use this skill when reviewing Terraform changes.
+
+Steps:
+
+1. Identify changed Terraform files.
+2. Summarize resources added, changed, or destroyed.
+3. Highlight IAM, service account, bucket, dataset, network, and production resource changes.
+4. Check whether the change requires explicit human approval.
+5. Do not run `terraform apply`.
+6. Produce a risk summary with:
+   - Safe changes
+   - Risky changes
+   - Unknowns
+   - Required approvals
+   - Suggested rollback or mitigation
+```
+
+---
+
+### 21.6 使い分けルール
+
+| 書きたい内容 | 書く場所 | 理由 |
+| --- | --- | --- |
+| 全ツール共通の技術スタック制約 | `AGENTS.md` | ツール横断の共通入口にするため |
+| Claude Code に常に守らせること | `CLAUDE.md` | Claude Code が毎セッション読む前提で使えるため |
+| Cursor に常に守らせること | `.cursor/rules/*.mdc` | Cursor のIDE内提案に効かせるため |
+| Copilot PRレビューやChatに効かせること | `.github/copilot-instructions.md` | GitHub Copilot の標準的なカスタム指示だから |
+| Python/Rust/React/Terraform/SQL 別の細則 | `.github/instructions/*.instructions.md`、`.cursor/rules/*.mdc` | パス別・言語別に分けるとノイズが少ないため |
+| 長い設計資料や手順書 | Skills / Knowledge | 常時読み込みに入れるとノイズになるため |
+| 何度も使う作業手順 | `.agents/skills/*/SKILL.md` | 手順化して再利用しやすいため |
+| レビュー専用ルール | `REVIEW.md`、Copilot instructions | 実装ルールとレビュー観点を分離するため |
+| チケット委譲の型 | Devin Playbooks / custom slash commands | 毎回同じ依頼テンプレートを使えるため |
+
+---
+
+### 21.7 このリポジトリで最初に作るべきもの
+
+優先順位は次の通り。
+
+1. `AGENTS.md`
+2. `CLAUDE.md`
+3. `.github/copilot-instructions.md`
+4. `.cursor/rules/project.mdc`
+5. `.cursor/rules/react-pico-no-nextjs.mdc`
+6. `.github/instructions/terraform.instructions.md`
+7. `.github/instructions/sql.instructions.md`
+8. `REVIEW.md`
+9. `.agents/skills/test-before-pr/SKILL.md`
+10. `.agents/skills/terraform-plan-review/SKILL.md`
+
+---
+
+### 21.8 運用上の注意
+
+- `AGENTS.md`、`CLAUDE.md`、`.github/copilot-instructions.md`、`.cursor/rules/project.mdc` に同じ内容を完全コピーし続けると、すぐに不整合が起きる。
+- 共通ルールは `AGENTS.md` を source of truth にし、他ファイルでは「AGENTS.md に従う」と書いた上で、ツール固有の補足だけを書く。
+- 長いAPI仕様、Terraform手順、Vertex AI手順、BigQueryコストレビュー手順は、常時指示ではなく `SKILL.md` に逃がす。
+- 本番DB、IAM、Terraform apply、GCP/AWS本番リソース、Vertex AI本番endpointは、人間承認なしで実行させない。
+- `Next.js禁止` は `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/react-pico-no-nextjs.mdc`、`.github/copilot-instructions.md` のすべてに明記する。
