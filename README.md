@@ -3,6 +3,19 @@
 作成日: `2026-05-03`  
 対象ツール: `Claude Code` / `Codex` / `Cursor` / `GitHub Copilot` / `Devin` / `DeepSeek`
 
+## 各ツールの詳細ドキュメント
+
+| ツール | ドキュメント | 位置づけ |
+| --- | --- | --- |
+| Claude Code | [claude-code/README.md](claude-code/README.md) | 技術作業の主力エージェント |
+| Codex CLI | [codex/README.md](codex/README.md) | リーダー業務・実装委譲 |
+| Cursor | [cursor/README.md](cursor/README.md) | IDE 内実装速度 |
+| GitHub Copilot | [github-copilot/README.md](github-copilot/README.md) | PR レビュー・組織標準・CLI |
+| Devin | [devin/README.md](devin/README.md) | チケット単位の委譲 |
+| DeepSeek | [deep-seek/README.md](deep-seek/README.md) | 低コスト API 基盤 |
+
+---
+
 このドキュメントは、一般的なAIコーディングツール比較ではなく、**リーダー業務とプログラミング業務の両方を担当する人** 向けの実務選定メモです。
 
 対象者は、ヒアリング、設計、スケジュール、見積もり、レビュー、ドキュメント、報告を行いながら、Python / Rust / PostgreSQL / BigQuery / DuckDB / React / Terraform / Vertex AI などを使って実装も行う前提です。
