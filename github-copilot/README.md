@@ -2,6 +2,14 @@
 
 作成日: `2026-05-03`
 
+## 運用カタログ
+
+- 判断DB: `/Users/kurosawa/Dev/ai-service/catalog/services/github-copilot.md`
+- 用途別ルール: `/Users/kurosawa/Dev/ai-service/catalog/usecases/coding.md`
+- 評価ログ: `/Users/kurosawa/Dev/ai-service/catalog/evaluations/`
+
+このページは教材・説明用。最新の運用判断、評価ログ、使い分けは `ai-service` 側を正とする。
+
 ## 1. 概要
 
 GitHub Copilot は GitHub（Microsoft）が提供する AI コーディング支援サービスです。

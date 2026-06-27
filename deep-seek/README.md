@@ -2,6 +2,15 @@
 
 作成日: `2026-05-03`
 
+## 運用カタログ
+
+- 候補棚: `/Users/kurosawa/Dev/ai-service/catalog/candidates/category-shelves.md`
+- 用途別ルール: `/Users/kurosawa/Dev/ai-service/catalog/usecases/coding.md`
+- ローカル / 秘匿用途: `/Users/kurosawa/Dev/ai-service/catalog/usecases/local-secret.md`
+- 評価ログ: `/Users/kurosawa/Dev/ai-service/catalog/evaluations/`
+
+DeepSeek はまだ `ai-service/catalog/services/` へ個別台帳化していない。運用判断に使う前に、候補棚からサービス台帳へ昇格して評価ログを作る。
+
 ## 1. 概要
 
 DeepSeek は中国の AI 企業 DeepSeek が開発・公開した LLM です。

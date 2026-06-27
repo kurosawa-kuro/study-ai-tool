@@ -2,6 +2,14 @@
 
 作成日: `2026-05-03`
 
+## 運用カタログ
+
+- 候補棚: `/Users/kurosawa/Dev/ai-service/catalog/candidates/category-shelves.md`
+- 用途別ルール: `/Users/kurosawa/Dev/ai-service/catalog/usecases/coding.md`
+- 評価ログ: `/Users/kurosawa/Dev/ai-service/catalog/evaluations/`
+
+Devin はまだ `ai-service/catalog/services/` へ個別台帳化していない。運用判断に使う前に、候補棚からサービス台帳へ昇格して評価ログを作る。
+
 ## 1. 概要
 
 Devin は Cognition AI が開発した完全自律型の AI ソフトウェアエンジニアです。

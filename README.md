@@ -5,6 +5,43 @@
 
 ---
 
+## このリポジトリの役割
+
+`study-ai-tool` は、AI開発支援ツールを学習・説明・教材化するためのリポジトリ。
+
+ここでは、読者に伝わる比較、業務別の使い分け、講座・記事・説明資料としての分かりやすさを優先する。
+実運用での採用判断、評価ログ、用途別ルーティング、候補棚は `/Users/kurosawa/Dev/ai-service` 側で管理する。
+
+```text
+study-ai-tool
+  = 教材・比較記事・説明用ドキュメント
+
+ai-service
+  = 個人カタログ・評価ログ・使い分けルール・候補棚
+```
+
+## ai-service 参照ルール
+
+AIツールの説明や比較を更新する前に、必要に応じて次を確認する。
+
+| 目的 | 参照先 |
+| --- | --- |
+| サービス / 技術ごとの運用台帳 | `/Users/kurosawa/Dev/ai-service/catalog/services/` |
+| 用途別の使い分け | `/Users/kurosawa/Dev/ai-service/catalog/usecases/` |
+| 実タスクの評価ログ | `/Users/kurosawa/Dev/ai-service/catalog/evaluations/` |
+| 未検証候補 | `/Users/kurosawa/Dev/ai-service/catalog/candidates/` |
+| 使い分け判断の正本 | `/Users/kurosawa/Dev/ai-service/catalog/routing-rules.md` |
+
+### 取り込みルール
+
+- `ai-service` の評価ログから、教材として説明しやすい知見だけをこのリポジトリへ取り込む。
+- 料金、API、CLI、MCP、利用規約など変わりやすい情報は、教材側で断定しすぎない。
+- `ai-service` の `未確認` / `要確認` / `未評価` は、そのまま教材へ確定情報として持ち込まない。
+- 教材化した場合は、可能なら元になった `ai-service/catalog/...` のパスをメモする。
+- このリポジトリで出た新しい候補や仮説は、運用判断に使う前に `ai-service/catalog/candidates/` へ戻す。
+
+---
+
 ## 0. このドキュメントの結論
 
 質問者は、**リーダー業務とプログラミング業務の両方**を担当する。
